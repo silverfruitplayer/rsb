@@ -1,43 +1,63 @@
 import praw
 import asyncio
-from pyrogram import Client
+from pyrogram import Client, filters, idle
+from pyrogram.types import Message
+import logging
+import requests
+import os
+from random import choice
 
-telegram_chat_id = ['']
 
 # Reddit API credentials
-reddit_client_id = ''
-reddit_client_secret = ''
-reddit_user_agent = ''
+reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
+reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
+reddit_user_agent = 'rstream'
+reddit_subreddit = 'greentext'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
     client_secret=reddit_client_secret,
-    user_agent=reddit_user_agent
+    user_agent=reddit_user_agent,
+    username="stebin58",
+    redirect_uri="http://localhost:8080"
 )
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO)
 
-app = Client("rbot", bot_token="", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
+app = Client("rbot", bot_token="6203076674:AAE9wnjKJHYovzXby86MqOMSf-LQ9QQx7Ok", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
 
-# Set to store processed post IDs
-processed_post_ids = set()
+os.makedirs("images/", exist_ok=True)
 
-# Function to send a Reddit post to Telegram
-async def send_post_to_telegram(post):
-    message = f"Title: {post.title}\n\n{post.url}"
-    await app.send_message(chat_id=telegram_chat_id, text=message)
 
-# Function to monitor and send new Reddit posts to Telegram
-async def monitor_reddit_channel():
-    subreddit = reddit.subreddit('memes')
-    while True:
-        async for post in subreddit.stream.submissions():
-            if post.id not in processed_post_ids:
-                await send_post_to_telegram(post)
-                processed_post_ids.add(post.id)
-        await asyncio.sleep(10)
+#telegram_chat_id = ['-1001894132283']
+@app.on_message(filters.command("send"))
+async def send_posts_to_telegram(_, message):
+    await message.reply("Sending posts as images...")   
+    # Retrieve posts from Reddit
+    subreddit = reddit.subreddit(reddit_subreddit)
+    posts = subreddit.new(limit=20000000000000000000000000000000000000000000000000)  # Adjust the limit as needed
+    
+    for post in posts:
+        if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+            # Download the image
+            response = requests.get(post.url)
+            if response.status_code == 200:
+                file_path = f"images/{post.id}.jpg"  # Save the image with the post ID as the filename
+                with open(file_path, "wb") as f:
+                    f.write(response.content)
+                    
+                # Send the image to Telegram channel
+                await asyncio.sleep(3)
+                await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
+                
+                # Remove the downloaded image
+                os.remove(file_path)
+
+    await message.reply("All posts sent as images.")
+
+
 
 app.start()
 idle()
