@@ -12,7 +12,7 @@ from random import choice
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
 reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
-reddit_subreddit = 'dankmemes'
+reddit_subreddit = 'youtubecomments'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
