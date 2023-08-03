@@ -1,7 +1,6 @@
 pyrogram==1.4
 TgCrypto
 requests
-wget
 praw
 
 
