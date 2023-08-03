@@ -63,6 +63,7 @@ async def send_posts_to_telegram(_, message):
                     wait_time = e.x
                     await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
                     time.sleep(wait_time)
+                    continue
                                     
         if stop_sending:
             break        
