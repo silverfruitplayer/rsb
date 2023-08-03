@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api": {
+      "runtime": "vercel-python@3.x",
+      "handler": "rsb.py"
+    }
+  }
+}
