@@ -37,7 +37,7 @@ os.makedirs("images/", exist_ok=True)
 #telegram_chat_id = ['-1001894132283']
 @app.on_message(filters.command("send"))
 async def send_posts_to_telegram(_, message):
-    await message.reply("Starting massive sending...")   
+    x = await message.reply("Starting...")   
     
     global stop_sending
     stop_sending = False
@@ -57,6 +57,7 @@ async def send_posts_to_telegram(_, message):
                     
                 # Send the image to Telegram channel
                 try:
+                    await x.edit("Waiting for 10 seconds...")
                     await asyncio.sleep(10)
                     await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
                     os.remove(file_path)
@@ -70,12 +71,14 @@ async def send_posts_to_telegram(_, message):
             break        
 
     await message.reply("All posts sent as images.")
+    await x.delete()
 
 @app.on_message(filters.command("stop"))
 async def stop_sending_images(_, message):
     global stop_sending
     stop_sending = True
-    await message.reply("Stopped. Bye!")
+    y = await message.reply("Stopped. Bye!")
+    await y.delete()
 
 
 app.start()
