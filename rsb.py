@@ -13,7 +13,7 @@ from pyrogram.errors.exceptions.flood_420 import FloodWait
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
 reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
-reddit_subreddit = 'rareinsults'
+reddit_subreddit = 'PornhubComments'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
