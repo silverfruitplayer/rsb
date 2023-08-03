@@ -12,7 +12,7 @@ from random import choice
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
 reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
-reddit_subreddit = 'youtubecomments'
+reddit_subreddit = 'PornhubComments'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
@@ -55,7 +55,6 @@ async def send_posts_to_telegram(_, message):
                     f.write(response.content)
                     
                 # Send the image to Telegram channel
-                await asyncio.sleep(25)
                 await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
                 
                 # Remove the downloaded image
