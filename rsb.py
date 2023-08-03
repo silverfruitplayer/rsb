@@ -12,7 +12,7 @@ from random import choice
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
 reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
-reddit_subreddit = 'PornhubComments'
+reddit_subreddit = 'rareinsults'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
@@ -36,7 +36,7 @@ os.makedirs("images/", exist_ok=True)
 #telegram_chat_id = ['-1001894132283']
 @app.on_message(filters.command("send"))
 async def send_posts_to_telegram(_, message):
-    await message.reply("Sending posts as images...")   
+    await message.reply("Starting massive sending...")   
     
     global stop_sending
     stop_sending = False
