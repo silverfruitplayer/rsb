@@ -6,7 +6,8 @@ import logging
 import requests
 import os
 from random import choice
-
+import time
+from pyrogram.errors import FloodWait 
 
 # Reddit API credentials
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
@@ -55,10 +56,14 @@ async def send_posts_to_telegram(_, message):
                     f.write(response.content)
                     
                 # Send the image to Telegram channel
-                await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
-                
-                # Remove the downloaded image
-                os.remove(file_path)
+                try:
+                    await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
+                    os.remove(file_path)
+                except FloodWait as e:
+                    wait_time = e.x
+                    await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
+                    time.sleep(wait_time)
+                                    
         if stop_sending:
             break        
 
