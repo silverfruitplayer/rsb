@@ -7,7 +7,7 @@ import requests
 import os
 from random import choice
 import time
-from pyrogram.errors import FloodWait 
+from pyrogram.errors.exceptions.flood_420 import FloodWait 
 
 # Reddit API credentials
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
@@ -57,6 +57,7 @@ async def send_posts_to_telegram(_, message):
                     
                 # Send the image to Telegram channel
                 try:
+                    await asymcio.sleep(10)
                     await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
                     os.remove(file_path)
                 except FloodWait as e:
