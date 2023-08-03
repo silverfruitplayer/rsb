@@ -57,7 +57,7 @@ async def send_posts_to_telegram(_, message):
                     
                 # Send the image to Telegram channel
                 try:
-                    await x.edit("Waiting for 10 seconds...")
+                    #await x.edit("Waiting for 10 seconds...")
                     await asyncio.sleep(10)
                     await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
                     os.remove(file_path)
