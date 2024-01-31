@@ -55,11 +55,10 @@ async def send_posts_to_telegram(_, message):
             try:
                 if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
                     await x.edit("Found Valid Channel Name, Sending..")
+                    await asyncio.sleep(2)
                     await x.delete()
                     await send_image(post, message)
                 elif post.is_video:
-                    await x.edit("Found Valid Channel Name, Sending..")
-                    await x.delete()
                     await send_video(post, message)
 
                 if stop_sending:
@@ -83,7 +82,8 @@ async def send_image(post, message):
         with open(file_path, "wb") as f:
             f.write(response.content)
 
-        try:            
+        try:
+            await asyncio.sleep(2)
             # Check if the post is marked as NSFW
             is_nsfw = post.over_18 if hasattr(post, 'over_18') else False
 
