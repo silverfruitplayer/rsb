@@ -117,7 +117,10 @@ async def stop_sending_images(_, message):
     stop_sending = True
     await message.reply("Stop signal received, Cooldown!")
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(app.start())
-loop.run_until_complete(idle())
+async def main():
+    # Start both app.start() and idle() concurrently
+    await asyncio.gather(app.start(), idle())
+
+if __name__ == "__main__":
+    asyncio.run(main())
  
