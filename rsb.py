@@ -55,12 +55,10 @@ async def send_posts_to_telegram(_, message):
             try:
                 if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
                     await x.edit("Found Valid Channel Name, Sending..")
-                    await asyncio.sleep(1)
                     await x.delete()
                     await send_image(post, message)
                 elif post.is_video:
                     await x.edit("Found Valid Channel Name, Sending..")
-                    await asyncio.sleep(1)
                     await x.delete()
                     await send_video(post, message)
 
@@ -85,15 +83,21 @@ async def send_image(post, message):
         with open(file_path, "wb") as f:
             f.write(response.content)
 
-        try:
-            await asyncio.sleep(2)
-            await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
+        try:            
+            # Check if the post is marked as NSFW
+            is_nsfw = post.over_18 if hasattr(post, 'over_18') else False
+
+            # Send the photo with spoiler tag if NSFW
+            if is_nsfw:
+                await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title, spoiler=True)
+            else:
+                await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
+            
             os.remove(file_path)
         except FloodWait as e:
             wait_time = e.x
             await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
             time.sleep(wait_time)
-
 
 async def send_video(post, message):
     video_url = post.media["reddit_video"]["fallback_url"]
@@ -104,7 +108,6 @@ async def send_video(post, message):
             f.write(response.content)
 
         try:
-            await asyncio.sleep(2)
             await app.send_video(chat_id=message.chat.id, video=file_path, caption=post.title)
             os.remove(file_path)
         except FloodWait as e:
