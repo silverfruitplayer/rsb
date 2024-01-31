@@ -54,9 +54,6 @@ async def send_posts_to_telegram(_, message):
         for post in subreddit.stream.submissions():
             try:
                 if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
-                    await x.edit("Found Valid Channel Name, Sending..")
-                    await asyncio.sleep(2)
-                    await x.delete()
                     await send_image(post, message)
                 elif post.is_video:
                     await send_video(post, message)
@@ -73,6 +70,7 @@ async def send_posts_to_telegram(_, message):
         return await message.reply(f"Subreddit not found. Please provide a valid subreddit.")
     except Exception as e:
         return await message.reply(f"An error occurred: {e}")
+    await x.delete()    
 
 
 async def send_image(post, message):
