@@ -13,7 +13,7 @@ from pyrogram.errors.exceptions.flood_420 import FloodWait
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
 reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
-reddit_subreddit = 'PornhubComments'
+reddit_subreddit = 'Animemes'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
@@ -27,14 +27,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO)
 
-app = Client("rbot", bot_token="6203076674:AAE9wnjKJHYovzXby86MqOMSf-LQ9QQx7Ok", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
+app = Client("rstreambot", bot_token="6203076674:AAGec-30uhR8D2f7nFaz0XSUpGySARJ6T1U", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
 
 os.makedirs("images/", exist_ok=True)
 
-
-
-
-#telegram_chat_id = ['-1001894132283']
 @app.on_message(filters.command("send"))
 async def send_posts_to_telegram(_, message):
     x = await message.reply("Starting...")   
@@ -42,42 +38,51 @@ async def send_posts_to_telegram(_, message):
     global stop_sending
     stop_sending = False
     
-    # Retrieve posts from Reddit
     subreddit = reddit.subreddit(reddit_subreddit)
-    posts = subreddit.new(limit=20000000000000000000000000000000000000000000000000)  # Adjust the limit as needed
     
-    for post in posts:
-        if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
-            # Download the image
-            response = requests.get(post.url)
-            if response.status_code == 200:
-                file_path = f"images/{post.id}.jpg"  # Save the image with the post ID as the filename
-                with open(file_path, "wb") as f:
-                    f.write(response.content)
-                    
-                # Send the image to Telegram channel
-                try:
-                    #await x.edit("Waiting for 10 seconds...")
-                    await asyncio.sleep(10)
-                    await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
-                    os.remove(file_path)
-                except FloodWait as e:
-                    wait_time = e.x
-                    await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
-                    time.sleep(wait_time)
-                    continue
-                                    
-        if stop_sending:
-            break        
+    while True:
+        try:
+            # Retrieve posts from Reddit
+            posts = subreddit.new(limit=1)
+            post = next(posts)  # Get the next post
 
-    await message.reply("All posts sent as images.")
+            if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+                # Download and send images
+                await send_image(post, message)
+            elif post.is_video:
+                # Download and send videos
+                await send_video(post, message)
+
+            if stop_sending:
+                break
+        except StopIteration:
+            await asyncio.sleep(60)
+    await message.reply("All posts sent as images and videos.")
     await x.delete()
+
+async def send_video(post, message):
+    video_url = post.media["reddit_video"]["fallback_url"]
+    response = requests.get(video_url)
+    if response.status_code == 200:
+        file_path = f"videos/{post.id}.mp4"
+        with open(file_path, "wb") as f:
+            f.write(response.content)
+
+        try:
+            await asyncio.sleep(10)
+            await app.send_video(chat_id=message.chat.id, video=file_path, caption=post.title)
+            os.remove(file_path)
+        except FloodWait as e:
+            wait_time = e.x
+            await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
+            time.sleep(wait_time)
+
 
 @app.on_message(filters.command("stop"))
 async def stop_sending_images(_, message):
     global stop_sending
     stop_sending = True
-    y = await message.reply("Stopped. Bye!")
+    y = await message.reply("Stop signal received, cooldown!")
     await y.delete()
 
 
