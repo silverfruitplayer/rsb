@@ -1,4 +1,4 @@
-pyrogram==1.4
+pyrogram
 TgCrypto
 requests
 praw
