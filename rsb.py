@@ -60,6 +60,23 @@ async def send_posts_to_telegram(_, message):
     await message.reply("All posts sent as images and videos.")
     await x.delete()
 
+async def send_image(post, message):
+    response = requests.get(post.url)
+    if response.status_code == 200:
+        file_path = f"images/{post.id}.jpg"
+        with open(file_path, "wb") as f:
+            f.write(response.content)
+
+        try:
+            await asyncio.sleep(10)
+            await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
+            os.remove(file_path)
+        except FloodWait as e:
+            wait_time = e.x
+            await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
+            time.sleep(wait_time)
+
+
 async def send_video(post, message):
     video_url = post.media["reddit_video"]["fallback_url"]
     response = requests.get(video_url)
