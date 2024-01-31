@@ -1,4 +1,5 @@
 import praw
+from prawcore.exceptions import NotFound
 import asyncio
 from pyrogram import Client, filters, idle
 from pyrogram.types import Message
@@ -48,7 +49,7 @@ async def send_posts_to_telegram(_, message):
             return await x.edit("Subreddit name is missing in the command.\nUsage: /send <subreddit channel name>")
         
         # Retrieve the subreddit
-        subreddit = await reddit.subreddit(subreddit_name)
+        subreddit = reddit.subreddit(subreddit_name)
         
         for post in subreddit.stream.submissions():
             try:
@@ -66,11 +67,11 @@ async def send_posts_to_telegram(_, message):
 
         await message.reply(f"All posts from /r/{subreddit_name} sent as images and videos.")
     except ValueError as e:
-        await message.reply(f"Invalid command. Please provide a subreddit name after /send.")
-    except BadRequest as e:
-        await message.reply(f"Invalid subreddit name. Please provide a valid subreddit.")
+        return await message.reply(f"Subreddit name is missing in the command.\nUsage: /send <subreddit channel name>")
+    except NotFound as e:
+        return await message.reply(f"Subreddit not found. Please provide a valid subreddit.")
     except Exception as e:
-        await message.reply(f"An error occurred: {e}")
+        return await message.reply(f"An error occurred: {e}")
 
     await x.delete()
 
