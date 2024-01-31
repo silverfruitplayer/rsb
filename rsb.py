@@ -40,11 +40,11 @@ async def send_posts_to_telegram(_, message):
     
     subreddit = reddit.subreddit(reddit_subreddit)
     
-    while True:
+    for post in subreddit.stream.submissions():
         try:
             # Retrieve posts from Reddit
-            posts = subreddit.new(limit=100000000000000000000000000000000000000000000000000000000000000000000000000000000000)
-            post = next(posts)  # Get the next post
+            #posts = subreddit.new(limit=1)
+            #post = next(posts)  # Get the next post
 
             if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
                 # Download and send images
