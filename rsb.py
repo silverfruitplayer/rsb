@@ -42,7 +42,8 @@ async def send_posts_to_telegram(subreddit_name, message):
             return await x.edit("Subreddit name is missing in the command.\nUsage: /send <subreddit channel name>")
 
         # Retrieve the subreddit
-        subreddit = await reddit.subreddit(subreddit_name)
+        subreddit_task = asyncio.create_task(reddit.subreddit(subreddit_name))
+        subreddit = await subreddit_task
 
         async for post in subreddit.stream.submissions():
             try:
