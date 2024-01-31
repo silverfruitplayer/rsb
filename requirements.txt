@@ -1,6 +1,6 @@
 pyrogram
 TgCrypto
 requests
-praw
+asyncpraw
 
 
