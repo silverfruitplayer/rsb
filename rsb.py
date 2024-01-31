@@ -54,14 +54,14 @@ async def send_posts_to_telegram(_, message):
         for post in subreddit.stream.submissions():
             try:
                 if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
-                    await y.edit("Found Valid Channel Name, Sending..")
+                    await x.edit("Found Valid Channel Name, Sending..")
                     await asyncio.sleep(1)
-                    await y.delete()
+                    await x.delete()
                     await send_image(post, message)
                 elif post.is_video:
-                    await y.edit("Found Valid Channel Name, Sending..")
+                    await x.edit("Found Valid Channel Name, Sending..")
                     await asyncio.sleep(1)
-                    await y.delete()
+                    await x.delete()
                     await send_video(post, message)
 
                 if stop_sending:
