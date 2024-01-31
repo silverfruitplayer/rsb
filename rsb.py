@@ -1,4 +1,5 @@
 import praw
+import uvloop
 from prawcore.exceptions import NotFound
 import asyncio
 from pyrogram import Client, filters, idle
@@ -121,6 +122,9 @@ async def stop_sending_images(_, message):
     await message.reply("Stop signal received, Cooldown!")
 
 async def main():
+    # Set uvloop as the event loop policy
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
     # Start both app.start() and idle() concurrently
     tasks = [app.start(), idle()]
     await asyncio.gather(*tasks)
