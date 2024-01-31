@@ -1,14 +1,12 @@
-import praw
-from prawcore.exceptions import NotFound
 import asyncio
+import logging
+from asyncpraw import Reddit, exceptions
 from pyrogram import Client, filters, idle
 from pyrogram.types import Message
-import logging
 import requests
 import os
-from random import choice
 import time
-from pyrogram.errors.exceptions.flood_420 import FloodWait 
+from pyrogram.errors.exceptions.flood_420 import FloodWait
 
 # Reddit API credentials
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
@@ -16,7 +14,7 @@ reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
 #reddit_subreddit = 'Animemes'
 
-reddit = praw.Reddit(
+reddit = Reddit(
     client_id=reddit_client_id,
     client_secret=reddit_client_secret,
     user_agent=reddit_user_agent,
@@ -33,25 +31,20 @@ app = Client("rstreambot", bot_token="6203076674:AAGec-30uhR8D2f7nFaz0XSUpGySARJ
 os.makedirs("images/", exist_ok=True)
 print("Successfully Set Directory As :images:")
 
-@app.on_message(filters.command("send"))
-async def send_posts_to_telegram(_, message):
-    x = await message.reply("Checking...")   
-    
+async def send_posts_to_telegram(subreddit_name, message):
+    x = await message.reply("Checking...")
     global stop_sending
     stop_sending = False
-    
+
     try:
-        # Extract subreddit name from user's message
-        command, subreddit_name = message.text.split(maxsplit=1)
-        
         # Check if subreddit_name is None or empty
         if not subreddit_name:
             return await x.edit("Subreddit name is missing in the command.\nUsage: /send <subreddit channel name>")
-        
+
         # Retrieve the subreddit
-        subreddit = reddit.subreddit(subreddit_name)
-        
-        for post in subreddit.stream.submissions():
+        subreddit = await reddit.subreddit(subreddit_name)
+
+        async for post in subreddit.stream.submissions():
             try:
                 if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
                     await send_image(post, message)
@@ -66,12 +59,11 @@ async def send_posts_to_telegram(_, message):
         await message.reply(f"All posts from /r/{subreddit_name} sent as images and videos.")
     except ValueError as e:
         return await message.reply(f"Subreddit name is missing in the command.\nUsage: /send <subreddit channel name>")
-    except NotFound as e:
+    except exceptions.NotFound as e:
         return await message.reply(f"Subreddit not found. Please provide a valid subreddit.")
     except Exception as e:
         return await message.reply(f"An error occurred: {e}")
-    await x.delete()    
-
+    await x.delete()
 
 async def send_image(post, message):
     response = requests.get(post.url)
@@ -90,7 +82,7 @@ async def send_image(post, message):
                 await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title, has_spoiler=True)
             else:
                 await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
-            
+
             os.remove(file_path)
         except FloodWait as e:
             wait_time = e.x
@@ -113,6 +105,10 @@ async def send_video(post, message):
             await message.reply(f"Received FloodWait error. Waiting for {wait_time} seconds...")
             time.sleep(wait_time)
 
+@app.on_message(filters.command("send"))
+async def send_command_handler(_, message):
+    command, subreddit_name = message.text.split(maxsplit=1)
+    await send_posts_to_telegram(subreddit_name, message)
 
 @app.on_message(filters.command("stop"))
 async def stop_sending_images(_, message):
@@ -120,5 +116,7 @@ async def stop_sending_images(_, message):
     stop_sending = True
     await message.reply("Stop signal received, Cooldown!")
 
-app.start()
-idle()
+loop = asyncio.get_event_loop()
+loop.run_until_complete(app.start())
+loop.run_until_complete(idle())
+ 
