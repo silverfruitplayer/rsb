@@ -87,7 +87,7 @@ async def send_image(post, message):
 
             # Send the photo with spoiler tag if NSFW
             if is_nsfw:
-                await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title, spoiler=True)
+                await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title, has_spoiler=True)
             else:
                 await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
             
