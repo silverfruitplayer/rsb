@@ -13,7 +13,7 @@ from pyrogram.errors.exceptions.flood_420 import FloodWait
 reddit_client_id = 'PwIeyGTeEHK6DQNAylKG2Q'
 reddit_client_secret = 'Lb511Fz1gVqcU2VTTHtWyUu2BanUtg'
 reddit_user_agent = 'rstream'
-reddit_subreddit = 'Animemes'
+#reddit_subreddit = 'Animemes'
 
 reddit = praw.Reddit(
     client_id=reddit_client_id,
@@ -30,35 +30,51 @@ logging.basicConfig(
 app = Client("rstreambot", bot_token="6203076674:AAGec-30uhR8D2f7nFaz0XSUpGySARJ6T1U", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
 
 os.makedirs("images/", exist_ok=True)
+print("Successfully Set Directory As :images:")
 
 @app.on_message(filters.command("send"))
 async def send_posts_to_telegram(_, message):
-    x = await message.reply("Starting...")   
+    x = await message.reply("Checking...")   
     
     global stop_sending
     stop_sending = False
     
-    subreddit = reddit.subreddit(reddit_subreddit)
-    
-    for post in subreddit.stream.submissions():
-        try:
-            # Retrieve posts from Reddit
-            #posts = subreddit.new(limit=1)
-            #post = next(posts)  # Get the next post
+    try:
+        # Extract subreddit name from user's message
+        command, subreddit_name = message.text.split(maxsplit=1)
+        
+        # Check if subreddit_name is None or empty
+        if not subreddit_name:
+            return await x.edit("Subreddit name is missing in the command.\nUsage: /send <subreddit channel name>")
+        
+        # Retrieve the subreddit
+        subreddit = await reddit.subreddit(subreddit_name)
+        
+        for post in subreddit.stream.submissions():
+            try:
+                if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+                    # Download and send images
+                    await send_image(post, message)
+                elif post.is_video:
+                    # Download and send videos
+                    await send_video(post, message)
 
-            if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
-                # Download and send images
-                await send_image(post, message)
-            elif post.is_video:
-                # Download and send videos
-                await send_video(post, message)
+                if stop_sending:
+                    break
+            except Exception as e:
+                print(f"Error processing post: {e}")
 
-            if stop_sending:
-                break
-        except StopIteration:
-            await asyncio.sleep(60)
-    await message.reply("All posts sent as images and videos.")
+        await message.reply(f"All posts from /r/{subreddit_name} sent as images and videos.")
+    except ValueError as e:
+        await message.reply(f"Invalid command. Please provide a subreddit name after /send.")
+    except BadRequest as e:
+        await message.reply(f"Invalid subreddit name. Please provide a valid subreddit.")
+    except Exception as e:
+        await message.reply(f"An error occurred: {e}")
+
     await x.delete()
+
+
 
 async def send_image(post, message):
     response = requests.get(post.url)
