@@ -54,10 +54,14 @@ async def send_posts_to_telegram(_, message):
         for post in subreddit.stream.submissions():
             try:
                 if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
-                    # Download and send images
+                    await y.edit("Found Valid Channel Name, Sending..")
+                    await asyncio.sleep(1)
+                    await y.delete()
                     await send_image(post, message)
                 elif post.is_video:
-                    # Download and send videos
+                    await y.edit("Found Valid Channel Name, Sending..")
+                    await asyncio.sleep(1)
+                    await y.delete()
                     await send_video(post, message)
 
                 if stop_sending:
@@ -73,9 +77,6 @@ async def send_posts_to_telegram(_, message):
     except Exception as e:
         return await message.reply(f"An error occurred: {e}")
 
-    await x.delete()
-
-
 
 async def send_image(post, message):
     response = requests.get(post.url)
@@ -85,7 +86,7 @@ async def send_image(post, message):
             f.write(response.content)
 
         try:
-            await asyncio.sleep(10)
+            await asyncio.sleep(2)
             await app.send_photo(chat_id=message.chat.id, photo=file_path, caption=post.title)
             os.remove(file_path)
         except FloodWait as e:
@@ -103,7 +104,7 @@ async def send_video(post, message):
             f.write(response.content)
 
         try:
-            await asyncio.sleep(10)
+            await asyncio.sleep(2)
             await app.send_video(chat_id=message.chat.id, video=file_path, caption=post.title)
             os.remove(file_path)
         except FloodWait as e:
@@ -116,9 +117,7 @@ async def send_video(post, message):
 async def stop_sending_images(_, message):
     global stop_sending
     stop_sending = True
-    y = await message.reply("Stop signal received, cooldown!")
-    await y.delete()
-
+    await message.reply("Stop signal received, Cooldown!")
 
 app.start()
 idle()
