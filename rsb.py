@@ -101,6 +101,7 @@ async def send_image(post, message):
 async def send_video(post, message):
     video_url = post.media["reddit_video"]["fallback_url"]
     response = requests.get(video_url)
+    print(response.content)
     if response.status_code == 200:
         file_path = f"videos/{post.id}.mp4"
         with open(file_path, "wb") as f:
