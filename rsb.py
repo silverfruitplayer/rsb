@@ -29,7 +29,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO)
 
-app = Client("rstreambot", bot_token="6203076674:AAGec-30uhR8D2f7nFaz0XSUpGySARJ6T1U", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
+app = Client("rstreambot1", bot_token="6203076674:AAFs0SvRB7HWTbqdb_y2WwlYMXOe9FJTAWE", api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
 
 os.makedirs("images/", exist_ok=True)
 print("Successfully Set Directory As :images:")
